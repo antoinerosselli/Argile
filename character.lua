@@ -1,16 +1,17 @@
 local scene = {}
 speed = 30
-jump = 0
+jump = 30
 
 function scene:init()
-    toolbarButtons = deleteButton(toolbarButtons, "Collision")
-    toolbarButtons = deleteButton(toolbarButtons, "Spawn")
-    toolbarButtons = deleteButton(toolbarButtons, "Dead")
-    toolbarButtons = deleteButton(toolbarButtons, "End")
-    toolbarButtons = deleteButton(toolbarButtons, "None")
-    toolbarButtons = deleteButton(toolbarButtons, "Erase")
-    toolbarButtons = deleteButton(toolbarButtons, "Load")
-    toolbarButtons = deleteButton(toolbarButtons, "Save")
+    menuButtons = deleteButton(menuButtons, "Collision")
+    menuButtons = deleteButton(menuButtons, "Spawn")
+    menuButtons = deleteButton(menuButtons, "Dead")
+    menuButtons = deleteButton(menuButtons, "End")
+    menuButtons = deleteButton(menuButtons, "None")
+    menuButtons = deleteButton(menuButtons, "Erase")
+    menuButtons = deleteButton(menuButtons, "Load")
+    menuButtons = deleteButton(menuButtons, "Save")
+    deleteSubMenu(menuMapButtons)
 end
 
 function scene:update(dt)

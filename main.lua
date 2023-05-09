@@ -1,9 +1,11 @@
 love = require('love')
-toolbarButtons = {}
+menuButtons = {}
+filename = ""
+mapeditor = false
 
-local sceneManager = require "sceneManager"
-local scene1 = require "map"
-local scene2 = require "prout"
+sceneManager = require "sceneManager"
+local map = require "map"
+local sprite = require "sprite"
 local preview = require "preview"
 local character = require "character"
 local music = require "music"
@@ -11,47 +13,58 @@ local game = require "game"
 
 
 function love.load()
-  sceneManager:addScene("scene1", scene1)
-  sceneManager:addScene("scene2", scene2)
+  love.window.setMode(1000, 800)
+
+  sceneManager:addScene("map", map)
+  sceneManager:addScene("sprite", sprite)
   sceneManager:addScene("preview",preview)
   sceneManager:addScene("character",character)
-  sceneManager:addScene("music",music)
-  sceneManager:addScene("game",game)
-  sceneManager:setCurrentScene("scene1")
-
-  addButton("Game", 10, 10, 100, 30, function()
-    sceneManager:setCurrentScene("game")
-  end)
-
-  addButton("Map", 120, 10, 100, 30, function()
-    sceneManager:setCurrentScene("scene1")
+  sceneManager:setCurrentScene("map")
+  
+  addButton("Map", 10, 10, 100, 30, function()
+    sceneManager:setCurrentScene("map")
   end)
   
-  addButton("Character", 230, 10, 100, 30, function()
+  addButton("Character", 120, 10, 100, 30, function()
     sceneManager:setCurrentScene("character")
   end)
 
-  addButton("Music", 340, 10, 100, 30, function()
-    sceneManager:setCurrentScene("music")
-  end)
-
-  addButton("Sprite", 450, 10, 100, 30, function()
-    sceneManager:setCurrentScene("scene2")
-  end)
-
-  addButton("Preview", 560, 10, 100, 30, function()
+  addButton("Preview", 230, 10, 100, 30, function()
     sceneManager:setCurrentScene("preview")
   end)
 
-  addButton("Create", 670, 10, 100, 30, function()
-    sceneManager:setCurrentScene("scene2")
-  end)
-
-
 end
 
+function mapExists(fl)
+  print(fl)
+  local fileInfo = love.filesystem.getInfo("maps/" .. filename, "file")
+  return fileInfo ~= nil
+end
+
+
+function love.textinput(t)
+  if edit == true then
+    filename = filename .. t
+  end
+end
+
+function love.keypressed(key)
+  if edit == true then
+    if key == "backspace" then
+      filename = ""
+    end  
+  end
+end
+
+
 function addButton(text, x, y, w, h, onClick)
-  table.insert(toolbarButtons, {
+  for _,button in ipairs(menuButtons) do
+    if button.text == text then
+      return
+    end
+  end
+  
+  table.insert(menuButtons, {
     text = text,
     x = x,
     y = y,
@@ -61,14 +74,39 @@ function addButton(text, x, y, w, h, onClick)
   })
 end
 
-function deleteButton(toolbarButtons, buttonText)
-  for i, button in ipairs(toolbarButtons) do
+
+function addSubButton(list,text, x, y, w, h, onClick)
+  for _,button in ipairs(list) do
+    if button.text == text then
+      return
+    end
+  end
+
+  table.insert(list, {
+    text = text,
+    x = x,
+    y = y,
+    w = w,
+    h = h,
+    onClick = onClick
+  })
+end
+
+function deleteSubMenu(list)
+    while #list > 0 do
+      table.remove(list)
+    end
+end
+
+
+function deleteButton(menuButtons, buttonText)
+  for i, button in ipairs(menuButtons) do
     if button.text == buttonText then
-      table.remove(toolbarButtons, i)
+      table.remove(menuButtons, i)
       break
     end
   end
-  return toolbarButtons
+  return menuButtons
 end
 
 
@@ -82,16 +120,21 @@ function love.draw()
 end
 
 function drawToolbar()
-  for i, button in ipairs(toolbarButtons) do
+  for i, button in ipairs(menuButtons) do
+    love.graphics.rectangle("line", button.x, button.y, button.w, button.h)
+    love.graphics.printf(button.text, button.x, button.y + 8, button.w, "center")
+  end
+  for i, button in ipairs(menuMapButtons) do
     love.graphics.rectangle("line", button.x, button.y, button.w, button.h)
     love.graphics.printf(button.text, button.x, button.y + 8, button.w, "center")
   end
 end
 
+
 function love.mousepressed(x, y, button)
   sceneManager:mousepressed(x,y,button)
   if button == 1 then
-    for i, button in ipairs(toolbarButtons) do
+    for i, button in ipairs(menuButtons) do
       if x >= button.x and x <= button.x + button.w and y >= button.y and y <= button.y + button.h then
         button.onClick()
         break
